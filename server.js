@@ -1,6 +1,6 @@
 const express = require("express");
 const pool = require("./db");
-const port = 1337;
+const port = 3000;
 
 const app = express();
 
@@ -19,26 +19,22 @@ app.get("/", async (req, res) => {
 
 app.post("/", async (req, res) => {
   const { name, location } = req.body;
-  const data = await pool.query(
-    "INSERT INTO schools (name, address) VALUES ($1, $2)",
-    [name, location]
-  );
-  res.status(200).send({ message: "Successfully created record!" });
   try {
+    await pool.query("INSERT INTO schools (name, address) VALUES ($1, $2)", [
+      name,
+      location,
+    ]);
+    res.status(200).send({ message: "Successfully created record!" });
   } catch (error) {
     console.error(error);
-    res.status(500);
+    res.status(500).send({ message: "Error creating record." });
   }
-
-  res.status(200).json({
-    message: `Your name: ${name}, your location: ${location}`,
-  });
 });
 
 app.get("/setup", async (req, res) => {
   try {
     await pool.query(
-      "CREATE TABLE schools(id SERIAL PRIMARY KEY, name VARCHAR(100), address VARCHAR(100)"
+      "CREATE TABLE schools(id SERIAL PRIMARY KEY, name VARCHAR(100), address VARCHAR(100))"
     );
   } catch (error) {
     console.error(error);
